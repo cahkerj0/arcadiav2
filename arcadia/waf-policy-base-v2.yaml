@@ -1,0 +1,54 @@
+apiVersion: appprotect.f5.com/v1beta1
+kind: APPolicy
+metadata:
+  name: waf-base-blocking
+spec:
+  policy:
+    name: waf-base-blocking
+    template:
+      name: POLICY_TEMPLATE_NGINX_BASE
+    applicationLanguage: utf-8
+    enforcementMode: blocking
+    response-pages:
+    - responseContent: "<html><head><title>Sorry Page</title><style>body { font-family: Arial, sans-serif; line-height: 1.6; text-align: center; }</style></head><body><p>Thank you for your patience and understanding.</p><p class='bold'>Unfortunately, we are unable to serve you right now. Please come back later.</p><p>Your support ID is: <span class='bold'><%TS.request.ID()%></span></p><p class='bold'><b>GREAT JOB!</p><p>You successfully protect your organization's future modern GenAI application.</b></p><a href='javascript:history.back();'>[Go Back]</a></body></html>"
+      responseHeader: "HTTP/1.1 200 OK\r\nCache-Control: no-cache\r\nPragma: no-cache\r\nConnection: close"
+      responseActionType: "custom"
+      responsePageType: "default"
+    blocking-settings:
+      violations:
+      - name: VIOL_DATA_GUARD
+        alarm: true
+        block: true
+    data-guard:
+      enabled: true
+      maskData: true
+      creditCardNumbers: true
+      usSocialSecurityNumbers: true
+      enforcementMode: ignore-urls-in-list
+      enforcementUrls: []
+---
+apiVersion: appprotect.f5.com/v1beta1
+kind: APLogConf
+metadata:
+  name: logconf
+spec:
+  filter:
+    request_type: all
+  content:
+    format: default
+    max_request_size: any
+    max_message_size: 64k
+
+---
+apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: waf-policy-base
+spec:
+  waf:
+    enable: false
+    apPolicy: "arcadia/waf-base-blocking"
+    securityLogs:
+    - enable: false
+      apLogConf: "arcadia/logconf"
+      logDest: "syslog:server=10.1.1.8:514"

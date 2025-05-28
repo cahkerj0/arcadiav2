@@ -1,0 +1,276 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sc-nginx-default-conf-9090-fe-cm
+data:
+  default.conf: |
+
+    map $http_api_key $api_client_name {
+       default       "";
+        "JAWex+W9oHGzu8r/ISVLWUgL"  "client_one";
+       "C+krNtqBtgefj9Pa1X5xeqht"  "client_two";
+       "FIIl5UAvqwi/i6U51W674qVj"  "client_three";
+       "dhK2mnQyx5IToMlEO8IX4C0x"  "client_four";
+       "gYcnerSVsipvMuMJBSYV3eSP"  "client_five";
+    }
+
+    map $request_uri $is_matching {
+      ~^/api/userid/10010/stockHolding  '{ "id": 10010, "name": "Olivia", "stock": "FFIV", "qty": 100 }';
+      ~^/api/userid/10020/stockHolding  '{ "id": 10020, "name": "Rahul", "stock": "TLS", "qty": 1200 }';
+      ~^/api/userid/10030/stockHolding  '{ "id": 10030, "name": "Chris", "stock": "TLSA", "qty": 400 }';
+      ~^/api/userid/10040/stockHolding  '{ "id": 10040, "name": "John", "stock": "CISCO", "qty": 500 }';
+      ~^/api/userid/10050/stockHolding  '{ "id": 10050, "name": "Emily", "stock": "MSFT", "qty": 5900 }';
+      ~^/api/userid/10060/stockHolding  '{ "id": 10060, "name": "Phil", "stock": "MSFT", "qty": 900 }';
+      ~^/api/userid/10070/stockHolding  '{ "id": 10070, "name": "Wong", "stock": "CHKP", "qty": 4900 }';
+      ~^/api/userid/10080/stockHolding  '{ "id": 10080, "name": "Steven", "stock": "APPL", "qty": 1900 }';
+      ~^/api/userid/10090/stockHolding  '{ "id": 10090, "name": "Alex", "stock": "MSFT", "qty": 10 }';
+      ~^/api/userid/10100/stockHolding  '{ "id": 10100, "name": "Lam", "stock": "IBM", "qty": 5 }';
+
+      default                0;
+    }
+
+    server {
+    listen       8080;
+    #server_name  localhost;
+
+    #charset koi8-r;
+    #access_log  /var/log/nginx/host.access.log  main;
+
+    #location / {
+    #    root   /usr/share/nginx/html;
+    #    index  index.html index.htm;
+    #}
+
+    #location /__imp_apg__/ {
+    #  proxy_pass https://dip.zeronaught.com;
+    #}
+
+    location /f5jsquery.js {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    location /gptquery.js {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    location /trading/login.php {
+        proxy_set_header Accept-Encoding "";
+        sub_filter '<head>' '<head> <script type="text/javascript" src="/f5jsquery.js"></script>';
+        proxy_pass http://127.0.0.1:9080/trading/login.php;
+        proxy_set_header Host $http_host;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_send_timeout 86400s;
+        proxy_read_timeout 86400s;
+        proxy_request_buffering off;
+    }
+
+    location / {
+        proxy_set_header Accept-Encoding "";
+        sub_filter '<head>' '<head> <script type="text/javascript" src="/gptquery.js"></script>';
+        proxy_pass http://127.0.0.1:9080;
+        proxy_set_header Host $http_host;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_send_timeout 86400s;
+        proxy_read_timeout 86400s;
+        proxy_request_buffering off;
+    }
+
+    # API key validation
+    location = /_validate_api_key {
+       internal;
+
+       if ($http_api_key = "") {
+           return 401; # Unauthorized
+       }
+       if ($api_client_name = "") {
+           return 403; # Forbidden
+       }
+
+        return 204; # OK (no content)
+    }
+
+    #    location /graphql {
+    #   proxy_pass http://tweet-graphql/graphql;
+    #   proxy_http_version 1.1;
+    #   proxy_set_header Connection "";
+    #   proxy_send_timeout 86400s;
+    #   proxy_read_timeout 86400s;
+    #   proxy_request_buffering off;
+    #}
+
+    location /api/auth {
+       auth_jwt   "API";
+       auth_jwt_type     signed;
+       proxy_pass http://127.0.0.1:4010/api/auth;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /api/updatePaymentInfoById {
+       auth_jwt   "API";
+       auth_jwt_type     signed;
+       proxy_pass http://127.0.0.1:4010/api/updatePaymentInfoById;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /api/changeOrderById {
+       auth_jwt   "API";
+       auth_jwt_type     signed;
+       proxy_pass http://127.0.0.1:4010/api/changeOrderById;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /api/getAllOrder {
+       auth_request /_validate_api_key;
+       proxy_pass http://127.0.0.1:4010/api/getAllOrder;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /api/cancelOrderById {
+       auth_request /_validate_api_key;
+       proxy_pass http://127.0.0.1:4010/api/cancelOrderById;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /api/placeOrder {
+       auth_request /_validate_api_key;
+       proxy_pass http://127.0.0.1:4010/api/placeOrder;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /api/validateDetailUserInfoById {
+
+       types { } default_type "application/json";
+
+       if ($http_api_key != "dhK2mnQyx5IToMlEO8IX4C0x") {
+            return 403;
+      }
+
+       if ($request_method != POST) {
+       return 403;
+       }
+      return 200 '{"id":40,"name":"Olivia Jen","username":"olivia","firstName":"Olivia","lastName":"Jen","birthday":"11\/11\/1970","cc":"4111111111111111","tfn":"123-456-789","nric":"S2720066D","hkic":"H4451386","myic":"771305-08-1234","userStatus":1,"qty":100}';
+      #add_header Content-Type application/json;
+    }
+
+    location ~ "^/api/userid/(\d{5})/stockHolding" {
+       types { } default_type "application/json";
+
+       if ($http_api_key != "dhK2mnQyx5IToMlEO8IX4C0x") {
+            return 403;
+      }
+
+       if ($request_method != GET) {
+       return 403;
+       }
+
+       if ($is_matching) {
+
+         return 200 $is_matching;
+       }
+       return 403;
+
+
+
+      #add_header Content-Type application/json;
+    }
+
+    location /api {
+       proxy_pass http://127.0.0.1:4010/api;
+       #proxy_set_header Host $http_host;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /money-transfer/ {
+       resolver 10.43.0.10 valid=1s;
+       set $upstream_server1 money-transfer.arcadia.svc.cluster.local;
+       proxy_pass http://$upstream_server1/$uri;
+       proxy_set_header Env $http_env;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    location /refer-friends/ {
+       resolver 10.43.0.10 valid=1s;
+       set $upstream_server2 refer-friends.arcadia.svc.cluster.local;
+       proxy_pass http://$upstream_server2/$uri;
+       proxy_http_version 1.1;
+       proxy_set_header Connection "";
+       proxy_send_timeout 86400s;
+       proxy_read_timeout 86400s;
+       proxy_request_buffering off;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+    #
+    #location ~ \.php$ {
+    #    proxy_pass   http://127.0.0.1;
+    #}
+
+    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+    #
+    #location ~ \.php$ {
+    #    root           html;
+    #    fastcgi_pass   127.0.0.1:9000;
+    #    fastcgi_index  index.php;
+    #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+    #    include        fastcgi_params;
+    #}
+
+    # deny access to .htaccess files, if Apache's document root
+    # concurs with nginx's one
+    #
+    #location ~ /\.ht {
+    #    deny  all;
+    #}
+
+    }
