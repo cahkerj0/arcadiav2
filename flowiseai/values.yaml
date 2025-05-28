@@ -1,0 +1,32 @@
+image:
+  #registry: docker.io
+  registry: reg.ai.local
+  repository: flowiseai/flowise
+  tag: 2.2.3
+
+serviceAccount:
+  create: true
+
+resources:
+   limits:
+     cpu: 4000m
+     memory: 8Gi
+   requests:
+     cpu: 4000m
+     memory: 8Gi
+
+persistence:
+  enabled: true
+  size: 5Gi
+
+config:
+  username: "admin"
+  password: "F5Passw0rd"
+
+extraEnvVars:
+ - name: LOG_LEVEL
+   value: 'info'
+ - name: DEBUG
+   value: 'false'
+ - name: NODE_TLS_REJECT_UNAUTHORIZED
+   value: '0'

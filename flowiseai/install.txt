@@ -1,0 +1,12 @@
+helm repo add cowboysysop https://cowboysysop.github.io/charts/
+
+kubectl create ns flowiseai
+
+helm -n flowiseai install flowiseai --values values.yaml cowboysysop/flowise
+
+or
+
+helm -n flowiseai upgrade flowiseai --values values.yaml cowboysysop/flowise
+
+
+helm -n flowiseai delete flowiseai

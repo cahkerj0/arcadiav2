@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simply-chat-ic
+  annotations:
+    nginx.org/websocket-services: "simply-chat"
+spec:
+  ingressClassName: nginx-ingress
+  tls:
+  - hosts:
+    - simply-chat.ai.local
+  rules:
+  - host: simply-chat.ai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: simply-chat
+            port:
+               number: 80

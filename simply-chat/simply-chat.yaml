@@ -1,0 +1,59 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: simply-chat
+spec:
+  selector:
+    app: simply-chat
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8501
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simply-chat
+  labels:
+    app: simply-chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simply-chat
+  template:
+    metadata:
+      labels:
+        app: simply-chat
+    spec:
+     containers:
+      - name: simply-chat
+        image: reg.ai.local/apps/simply-chat:v2.1
+        securityContext:
+           capabilities:
+              add:
+                - NET_RAW
+                - NET_BIND_SERVICE
+                - CHOWN
+                - SETGID
+                - SETUID
+                - SETPCAP
+                - FSETID
+                - FOWNER
+                - DAC_OVERRIDE
+                - KILL
+              drop:
+                - all
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: AIGW_API_URL
+          value: "https://aigw.ai.local/simply-chat"
+        - name: AI_MODEL
+          value: "llama3"
+        - name: AI_TEMP
+          value: "0.7"
+        ports:
+        - containerPort: 8501
+

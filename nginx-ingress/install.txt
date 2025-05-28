@@ -1,0 +1,12 @@
+kubectl create ns nginx-ingress
+
+helm -n nginx-ingress install nginxic oci://ghcr.io/nginxinc/charts/nginx-ingress -f values-plus-nap.yaml
+
+kubectl -n nginx-ingress get pod,svc
+
+
+
+
+helm -n nginx-ingress delete nginxic
+
+

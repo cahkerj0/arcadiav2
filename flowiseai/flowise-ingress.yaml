@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flowise-ic
+  annotations:
+    nginx.org/proxy-connect-timeout: "120s"
+    nginx.org/proxy-read-timeout: "120s"
+    nginx.org/proxy-send-timeout: "120s"
+spec:
+  ingressClassName: nginx-ingress
+  tls:
+  - hosts:
+    - llm-orch.ai.local
+  rules:
+  - host: llm-orch.ai.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: flowiseai
+            port:
+               number: 3000
