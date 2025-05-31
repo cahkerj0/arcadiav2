@@ -219,7 +219,7 @@ data:
     }
 
     location /money-transfer/ {
-       resolver 10.43.0.10 valid=1s;
+       resolver 192.168.1.10 valid=1s;
        set $upstream_server1 money-transfer.arcadia.svc.cluster.local;
        proxy_pass http://$upstream_server1/$uri;
        proxy_set_header Env $http_env;
@@ -231,7 +231,7 @@ data:
     }
 
     location /refer-friends/ {
-       resolver 10.43.0.10 valid=1s;
+       resolver 192.168.1.10 valid=1s;
        set $upstream_server2 refer-friends.arcadia.svc.cluster.local;
        proxy_pass http://$upstream_server2/$uri;
        proxy_http_version 1.1;

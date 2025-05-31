@@ -15,7 +15,7 @@ spec:
         app: frontend
     spec:
       containers:
-        - image: reg.ai.local/fintech/arcadia-frontend:v5.2
+        - image: fauziramadhan/arcadia-frontend:v2.0
           imagePullPolicy: IfNotPresent
           name: frontend
           env:
@@ -35,7 +35,7 @@ spec:
             - containerPort: 8443
               protocol: TCP
         - name: nginx-sc
-          image: reg.ai.local/ngx/ngx-plus:v5.0-unpriv
+          image: reg.edgecnf.com/ngx/ngx-plus:v3.0-unpriv
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 9090
@@ -50,7 +50,7 @@ spec:
             mountPath: /usr/share/nginx/html/gptquery.js
             subPath: gptquery.js
         - name: apigw-trading
-          image: reg.ai.local/apps/arcadia-apigw:v2.3
+          image: reg.edgecnf.com/apps/arcadia-apigw:v2.3
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 4010
@@ -59,7 +59,7 @@ spec:
             mountPath: /usr/src/prism/api-gw.json
             subPath: api-gw.json
         - name: apigw-loadgen
-          image: reg.ai.local/apps/newman:2.3
+          image: fauziramadhan/newman:2.3
           imagePullPolicy: IfNotPresent
           volumeMounts:
           - name: fe-to-money-backend-referfriends-postman
